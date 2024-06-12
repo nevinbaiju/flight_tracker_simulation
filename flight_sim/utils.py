@@ -1,4 +1,3 @@
-import geocoder
 import random
 import string
 import math
@@ -31,11 +30,6 @@ def generate_random_username(length=8):
     """Generate a random username with the given length."""
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(length))
-
-def get_user_location():
-    """Get the user's location using geocoder."""
-    g = geocoder.ip('me')
-    return g.latlng
 
 def generate_random_coordinates():
     """Generates random coordinates on Earth."""
