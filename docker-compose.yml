@@ -18,15 +18,30 @@ services:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
     depends_on:
       - zookeeper
-  producer:
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis_data:/data"
+
+  flight_sim:
     build:
-      context: ./Dockerfiles
-      dockerfile: Dockerfile.python
+      context: .
+      dockerfile: ./Dockerfiles/Dockerfile.python
     volumes:
       - ./flight_sim:/app/flight_sim
+
+  flight_logger:
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/Dockerfile.logger
 
 volumes:
   zookeeper_data:
     driver: local
   kafka_data:
+    driver: local
+  redis_data:
     driver: local

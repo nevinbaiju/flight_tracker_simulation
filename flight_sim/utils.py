@@ -8,6 +8,7 @@ import logging
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z'
 EARTH_RADIUS_KM = 6371.0
 AVG_FLIGHT_SPEED = 5
+DELAY = 0.5
 
 def setup_logger(name):
     logger = logging.getLogger(name)
@@ -44,11 +45,6 @@ def euclidean_distance(coord1, coord2):
     
     return math.sqrt((lon1 - lon2)**2 + (lat1-lat2)**2)
 
-def flight_duration(distance_km):
-    """Calculates flight duration based on distance. Assuming average flight speed of 900 km/h."""
-    duration_hours = distance_km / AVG_FLIGHT_SPEED
-    return duration_hours
-
 def generate_fligh_path():
     """Generates a list of flight paths with random coordinates."""
     start = generate_random_coordinates()
@@ -63,15 +59,14 @@ def generate_fligh_path():
         # Inter-country (longer distances)
         end = generate_random_coordinates()
     distance = euclidean_distance(start, end)
-    duration = flight_duration(distance)
     flight = {
         'flight_id': generate_random_username(),
         'start': start,
         'curr': start,
         'end': end,
         'distance_km': distance,
-        'duration_hours': duration,
-        'start_time': datetime.datetime.now(datetime.timezone.utc).strftime(DATETIME_FORMAT)
+        'start_time': datetime.datetime.now(datetime.timezone.utc).strftime(DATETIME_FORMAT),
+        'landed': False
     }
     
     return flight
@@ -100,7 +95,7 @@ def get_current_position(flight):
     
     elapsed_time_hours = (current_time - start_time).total_seconds() / 3600
     
-    distance_traveled = 100 * elapsed_time_hours
+    distance_traveled = 400 * elapsed_time_hours
 
     if distance_traveled >= flight['distance_km']:
         return True, flight['end']
