@@ -48,7 +48,7 @@ public class App
                         String flightId = flightLocationJSON.getString("flight_id");
                         flightLocationJSON.remove("flight_id");
                         
-                        jedis.set(flightId, flightLocationJSON.toString());
+                        jedis.setex(flightId, 15, flightLocationJSON.toString());
                     }
                 }
             } catch (JSONException e) {
