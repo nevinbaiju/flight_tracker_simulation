@@ -5,4 +5,12 @@ WORKDIR /app
 COPY ./client_app/ /app/
 RUN pip install -r requirements.txt
 
+ARG REDIS_HOST
+ARG REDIS_PASSWORD
+ARG REDIS_PORT
+
+ENV REDIS_HOST=$REDIS_HOST \
+    REDIS_PASSWORD=$REDIS_PASSWORD \
+    REDIS_PORT=$REDIS_PORT
+
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
