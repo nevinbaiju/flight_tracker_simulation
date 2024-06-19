@@ -1,46 +1,20 @@
-# # app.py
-
-# from flask import Flask, render_template
-# from flask_socketio import SocketIO, emit
-# from flask_cors import CORS
-import redis
-# import json
-
-# app = Flask(__name__)
-# CORS(app)  # Enable CORS for all routes
-# socketio = SocketIO(app, cors_allowed_origins="*")  # Enable CORS for SocketIO
-
-# redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
-
-# def listen_to_redis():
-#     pubsub = redis_client.pubsub()
-#     pubsub.subscribe('flight_updates')  # Channel name for flight updates
-
-#     for message in pubsub.listen():
-#         if message['type'] == 'message':
-#             flight_data = json.loads(message['data'])
-#             print('Emitting flight update:', flight_data)
-#             socketio.emit('flight_update', flight_data, namespace='/flights')
-
-# @app.route('/')
-# def index():
-#     return render_template('index.html')
-
-# if __name__ == '__main__':
-#     socketio.start_background_task(target=listen_to_redis)
-#     socketio.run(app, debug=True)
-
-
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 
 import redis
 import json
 import time
+import os
+
+redis_host = os.getenv('REDIS_HOST')
+redis_port = int(os.getenv('REDIS_PORT'))
+redis_password = os.getenv('REDIS_PASSWORD')
+
+print(redis_host, redis_port, redis_password)
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis_client = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password)
 
 @app.route('/')
 def index():
@@ -52,17 +26,17 @@ def background_task():
         time.sleep(0.1)
 
             # Connect to the Redis server
-        client = redis.Redis(host='localhost', port=6379, db=0)
-        keys = client.keys('*')
+        keys = redis_client.keys('*')
         flights = []
         for key in keys:
-            value = client.get(key)
+            value = redis_client.get(key)
             try:
                 value = json.loads(value.decode('utf-8'))
             except (json.JSONDecodeError, AttributeError):
-                value = value.decode('utf-8')
-            except:
-                continue
+                try:
+                    value = value.decode('utf-8')
+                except:
+                    continue
             value['flight_id'] = key.decode("utf-8")
             flights.append(value)
             

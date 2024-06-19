@@ -9,12 +9,11 @@
 </head>
 <body>
     <div id="map"></div>
-
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="static/js/leaflet.rotatedMarker.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js"></script>
     <script>
         var socket = io.connect('http://' + document.domain + ':' + location.port + '/flights');
-
         var map = L.map('map').setView([0, 0], 2); // Center map around the world
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
@@ -39,8 +38,11 @@
                 markers[flight_id].remove();
             } 
             json_list.forEach(flight => {
-                markers[flight['flight_id']] = L.marker([flight.curr[0], flight.curr[1]], { icon: flightIcon }).addTo(map);
-                markers[flight['flight_id']].bindPopup('<b>Flight Info</b><br>' + JSON.stringify(flight))
+                let heading = Math.atan2(flight.end[1] - flight.start[1], flight.end[0] - flight.start[0]);
+                let rotation = ((heading * 180 / Math.PI)+180)%180;
+
+                markers[flight.flight_id] = L.marker(flight.curr, { icon: flightIcon, rotationAngle: rotation }).addTo(map);
+                markers[flight.flight_id].bindTooltip('<b>Flight ID</b><br>' + flight.flight_id + ' ' + rotation);
             });
         });
 
@@ -48,30 +50,5 @@
             console.error('Connection error:', error);
         });
     </script>
-    <!-- <script>
-        var map = L.map('map').setView([0, 0], 2); // Center map around the world
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        var socket = io.connect('http://' + document.domain + ':' + location.port + '/flights');
-        console.log('Here lies death');
-        socket.on('connect', function() {
-            console.log('Connected to server');
-        });
-
-        socket.on('flight_update', function(data) {
-            console.log('Received flight update:', data);
-            // Update flight marker on the map based on 'curr' attribute in data
-            var flightMarker = L.marker([data.curr[0], data.curr[1]]).addTo(map);
-            flightMarker.bindPopup('<b>Flight Info</b><br>' + JSON.stringify(data));
-        });
-
-        socket.on('connect_error', function(error) {
-            console.error('Connection error:', error);
-        });
-    </script> -->
 </body>
 </html>
