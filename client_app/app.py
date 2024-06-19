@@ -27,7 +27,6 @@ def index():
 def background_task():
     global connected_clients, start_task
     while start_task.is_set() and connected_clients:
-        print('tasking ', connected_clients)
         time.sleep(0.1)
 
             # Connect to the Redis server
