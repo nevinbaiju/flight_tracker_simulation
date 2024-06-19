@@ -36,14 +36,18 @@ public class App
         // Subscribe to the topic
         consumer.subscribe(Collections.singleton(topic));
         System.out.println("Reading stuff");
+
+        String redisHost = System.getenv("REDIS_HOST");
+        int redisPort = Integer.parseInt(System.getenv("REDIS_PORT"));
+        String redisPassword = System.getenv("REDIS_PASSWORD");
         try {
-            try (Jedis jedis = new Jedis("redis", 6379)) {
+            try (Jedis jedis = new Jedis(redisHost, redisPort)) {
+                jedis.auth(redisPassword);
                 while (true) {
                     // Poll for new messages
                     ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, String> record : records) {
                         String flightLocation = record.value();
-                        System.out.println(flightLocation);
                         JSONObject flightLocationJSON = new JSONObject(flightLocation);
                         String flightId = flightLocationJSON.getString("flight_id");
                         flightLocationJSON.remove("flight_id");
@@ -52,7 +56,7 @@ public class App
                     }
                 }
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         } finally {
             consumer.close();

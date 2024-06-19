@@ -60,7 +60,7 @@ class KafkaConnector:
     def send_message(self, message):
         if self.async_producer:
             try:
-                logger.info(message)
+                # logger.info(message)
                 self.async_producer.produce(message.encode())
             except Exception as e:
                 logger.error(f"Error while sending message: {e}")

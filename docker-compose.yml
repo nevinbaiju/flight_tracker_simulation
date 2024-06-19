@@ -19,12 +19,12 @@ services:
     depends_on:
       - zookeeper
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    volumes:
-      - "redis_data:/data"
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - "redis_data:/data"
 
   flight_sim:
     build:
@@ -33,10 +33,26 @@ services:
     volumes:
       - ./flight_sim:/app/flight_sim
 
+  client_app:
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/Dockerfile.clientapp
+    ports:
+      - "5000:5000"
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+
+
   flight_logger:
     build:
       context: .
       dockerfile: ./Dockerfiles/Dockerfile.logger
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
 
 volumes:
   zookeeper_data:
